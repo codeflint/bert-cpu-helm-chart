@@ -1,0 +1,60 @@
+global:
+  labels: {}
+
+replicaCount: 1
+
+image:
+  repository: codekee/bert-service
+  tag: 3.0.0
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  bport: 5555
+  bportout: 5556
+  http: 80
+
+ingress:
+  enabled: false
+  annotations:
+    kubernetes.io/ingress.class: nginx-private
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  paths:
+    - /{{ template "bert-cpu.name" . }}/{{ .Release.Name }}/?(.*)
+  hosts:
+    - example.com
+
+resources:
+  limits:
+    cpu: 3000m
+    memory: 4000Mi
+  requests:
+    cpu: 2500m
+    memory: 2096Mi
+
+envVar:
+  numWorker: 3
+  maxBatchSize: 12
+  maxSeqLen: 40
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+autoscaling:
+  enabled: false
+
+  vpa:
+    enabled: false
+    updateMode: "Off"
+
+  hpa:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 50
